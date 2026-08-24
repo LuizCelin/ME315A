@@ -1,0 +1,111 @@
+---
+title: "ME315A Lista 02"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: source
+---
+
+## Conex\]ao R \>\> SQLite
+
+```{r}
+#install.packages("DBI")
+#install.packages("RSQLite")
+library(DBI)
+library(RSQLite)
+
+con <- dbConnect(SQLite(), "me315.sqlite")
+```
+
+```{sql connection = con}
+SELECT * FROM PRESERVE
+```
+
+## QUESTÃO 1
+
+```{sql connection = con}
+SELECT * FROM PRESERVE
+ORDER BY ACRES
+```
+
+## QUESTÃO 2
+
+```{sql connection = con}
+SELECT PNAME, FEE FROM PRESERVE
+WHERE STATE = "MT"
+ORDER BY PNAME DESC
+```
+
+## QUESTÃO 3
+
+```{sql connection = con}
+SELECT FEE, ACRES FROM PRESERVE
+ORDER BY FEE, ACRES
+```
+
+## QUESTÃO 4
+
+```{sql connection = con}
+SELECT PNAME FROM PRESERVE
+WHERE STATE = "AZ"
+ORDER BY PNO
+```
+
+## QUESTÃO 5
+
+```{sql connection = con}
+SELECT STATE, FEE, PNO FROM PRESERVE
+WHERE ACRES >= 100
+ORDER BY STATE DESC, FEE DESC, PNO
+```
+
+## QUESTÃO 6
+
+```{sql connection = con}
+SELECT * FROM PRESERVE
+WHERE STATE > "M"
+```
+
+## QUESTÃO 7
+
+```{sql connection = con}
+SELECT * FROM PRESERVE
+WHERE PNAME <= "TATKON"
+```
+
+# EXERCICIOS EMPLOYEE
+
+## QUESTÃO 9
+```{sql connection = con}
+SELECT * FROM EMPLOYEE
+ORDER BY ENAME
+```
+
+## QUESTÃO 10
+```{sql connection = con}
+SELECT ENAME, SALARY FROM EMPLOYEE
+WHERE SALARY > 2000
+ORDER BY SALARY DESC
+```
+## QUESTÃO 11
+```{sql connection = con}
+SELECT DNO, ENO, ENAME FROM EMPLOYEE
+ORDER BY DNO DESC, ENO
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
