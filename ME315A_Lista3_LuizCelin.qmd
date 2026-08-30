@@ -1,0 +1,207 @@
+---
+title: "ME315A_Lista3"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: visual
+---
+# Lista 3
+
+## SETUP
+```{r setup}
+library(DBI)
+library(RSQLite)
+
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "me315.sqlite")
+```
+
+## QUESTÃO 1
+```{sql connection=con}
+SELECT DISTINCT STATE, FEE FROM PRESERVE
+```
+
+## QUESTÃO 2
+```{sql connection=con}
+SELECT DISTINCT DNO FROM EMPLOYEE
+
+```
+
+## QUESTÃO 3
+#### PRIMEIRA QUERY
+```{sql connection=con}
+SELECT DNO, SALARY FROM EMPLOYEE
+```
+Nesta primeira Query puxo os valores DNO e Salary independente se forem repetidos ou não. 
+
+#### SEGUNTA QUERY
+```{sql connection=con}
+SELECT DISTINCT DNO, SALARY FROM EMPLOYEE
+```
+Nesta segunda Query puxamos os valores distintos. Contudo, como não à valores repetidos o banco parece o mesmo.
+
+#### TERCEIRA QUERY
+```{sql connection=con}
+SELECT DISTINCT DNO, SALARY FROM EMPLOYEE
+ORDER BY DNO, SALARY
+```
+Na terceira, puxamos DNO e Salary em ordem de DNO, somente valores distintos.
+
+## QUESTÃO 4
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE STATE = "MT" AND ACRES < 1000
+```
+
+## QUESTÃO 5
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE ACRES <= 15000 AND ACRES >= 1200
+```
+
+## QUESTÃO 6
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE FEE = 0 AND ACRES >= 10000 AND STATE = "MT"
+```
+
+## QUESTÃO 7
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE STATE = "MT" OR STATE = "MA"
+```
+
+## QUESTÃO 8
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE STATE = "MT" OR ACRES < 1000
+```
+
+## QUESTÃO 9
+```{sql connection=con}
+SELECT PNO, PNAME FROM PRESERVE
+WHERE FEE != 0
+```
+
+## QUESTÃO 10
+```{sql connection=con}
+SELECT PNO, PNAME FROM PRESERVE
+WHERE FEE != 3 AND FEE != 10
+```
+
+## QUESTÃO 11
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE (STATE = "AZ" AND FEE = 0) OR ACRES < 100
+```
+
+## QUESTÃO 12
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE (ACRES < 1000 AND FEE = 0) OR STATE = "AZ"
+```
+
+## QUESTÃO 13
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE (STATE = "MT" AND ACRES > 1000) OR FEE < 0
+```
+
+## QUESTÃO 14
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT (STATE = "MT" AND FEE = 0)
+```
+
+## QUESTÃO 15
+#### Situação 1
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE STATE = 'MA' AND (ACRES > 1000 OR FEE = 0.0)
+```
+
+#### Situação 2
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE (STATE = 'MA' AND ACRES > 1000) OR (STATE = 'MA' AND FEE = 0.0)
+```
+#### Resposta
+Sim, ambos são iguais. Pensando em teoria dos conjuntos a interseção da união de 2 conjuntos é a União da interseção. 
+$$A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$$
+## QUESTÃO 16
+#### Situação 1
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE STATE = 'MA' OR (ACRES > 1000 AND FEE = 0.0)
+```
+
+#### Situação 2
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE (STATE = 'MA' OR ACRES > 1000) AND (STATE = 'MA' OR FEE = 0.0)
+```
+
+#### Resposta
+Assim como na pergunta anterior, sim são logicamentes equivalentes.
+$$A \cup (B \cap C) = (A \cup B)\cap(A \cup C)$$
+
+## QUESTÃO 17
+#### Situação 1
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT (ACRES < 50 AND STATE = 'MA')
+```
+
+#### Situação 2
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT ACRES < 50 AND NOT STATE = 'MA'
+```
+
+#### Situação 3
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE ACRES >= 50 OR STATE <> 'MA'
+```
+
+#### Resposta
+Neste caso, a situação 1 é equivalente à situação 3 por conta da Lei de Morgan. Mas, diferem da situação 2.
+$$(A \cap B)^c = A^c \cup B^c$$
+Sendo a correção para a situação 2:
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT ACRES < 50 OR NOT STATE = 'MA'
+```
+
+## QUESTÃO 18
+#### Situação 1
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT (ACRES < 50 OR STATE = 'MA')
+```
+
+#### Situação 2
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT ACRES < 50 OR NOT STATE = 'MA'
+```
+
+#### Situação 3
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT ACRES < 50 AND NOT STATE = 'MA'
+```
+
+#### Resposta
+Aqui temos o mesmo problema que a questão anterior.
+$$(A \cup B)^c = A^c \cap B^c$$
+Sendo a correção para a situação 2:
+```{sql connection=con}
+SELECT * FROM PRESERVE
+WHERE NOT ACRES < 50 AND NOT STATE = 'MA'
+```
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+
+```
+
