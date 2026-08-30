@@ -1,0 +1,141 @@
+---
+title: "ME315a_Lab03_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: visual
+---
+
+## Setup
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+  )
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(leaflet)
+library(webshot)
+```
+
+## QUESTÃO 1
+```{r airports}
+airports <- read_csv(
+  "airports.csv",
+  col_types = cols_only(
+    IATA_CODE = col_character(),
+    CITY = col_character(),
+    STATE = col_character(),
+    LATITUDE = col_double(),
+    LONGITUDE = col_double()
+  )
+)
+```
+
+
+```{r airlines}
+airlines <- read_csv("airlines.csv")
+```
+
+
+
+```{r getStats}
+getStats <- function(input, pos) {
+  input %>%
+    filter(!startsWith(DESTINATION_AIRPORT, "1")) %>%
+    filter(!is.na(DESTINATION_AIRPORT) &
+             !is.na(ARRIVAL_DELAY)) %>%
+    group_by(DESTINATION_AIRPORT) %>%
+    summarise(
+      soma_atrasos = sum(ARRIVAL_DELAY),
+      n_voos = n()
+    )
+}
+```
+
+
+```{r flights_import}
+flights <- read_csv_chunked(
+  "flights.csv.zip",
+  callback = DataFrameCallback$new(getStats),
+  chunk_size = 1e6,
+  col_types = cols_only(
+    DESTINATION_AIRPORT = col_character(),
+    ARRIVAL_DELAY = col_double()
+  )
+)
+```
+
+```{r flights_stats}
+flights <- flights %>%
+  group_by(DESTINATION_AIRPORT) %>%
+  summarise(
+    total_atrasos = sum(soma_atrasos),
+    total_voos = sum(n_voos)
+  ) %>%
+  mutate(
+    atraso_medio = total_atrasos / total_voos
+  )
+```
+
+
+## QUESTÃO 2
+```{r anti_join}
+flights %>%
+  anti_join(
+    airports,
+    by = c("DESTINATION_AIRPORT" = "IATA_CODE")
+  ) %>%
+  select(DESTINATION_AIRPORT)
+
+#Outra opção estranha
+
+#intersect(airports$IATA_CODE, flights$DESTINATION_AIRPORT)
+```
+
+```{r left_join}
+flights_left <- flights %>%
+  left_join(airports %>%
+              select(IATA_CODE, CITY, STATE),
+            by = c("DESTINATION_AIRPORT" = "IATA_CODE")
+            )
+```
+
+## QUESTÃO 3
+```{r qnt_aeroportos}
+flights_left %>%
+  group_by(STATE) %>%
+  summarise(Quantidade = n()) %>%
+  arrange(desc(Quantidade))
+
+#Outra opção
+#flights %>%
+#  count(STATE, sort = TRUE)
+```
+
+## QUESTÃO 4
+```{r novo_banco}
+#?leaflet
+#?addTiles
+#?addMarkers
+flights_map <- flights %>%
+  left_join(airports %>%
+              select(IATA_CODE, LATITUDE, LONGITUDE),
+            by = c("DESTINATION_AIRPORT" = "IATA_CODE")
+            )
+```
+
+```{r mapa}
+this <- leaflet(flights_map) %>%
+  addTiles() %>%
+  addMarkers(
+    lng = ~LONGITUDE,
+    lat = ~LATITUDE
+  )
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
