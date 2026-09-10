@@ -1,0 +1,105 @@
+---
+title: "Lab04_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+---
+# Questão 1
+```{r}
+library(readxl)
+library(tidyverse)
+```
+
+# Questão 2
+
+```{r}
+fname <- 'WDIEXCEL.xlsx'
+file.exists(fname)
+```
+
+# Questão 3
+
+```{r}
+countries <- read_excel(fname, sheet = "Country")
+```
+
+# Questão 4
+
+```{r}
+countries <- countries |> 
+  filter(`Country Code` %in% c("BRA", "USA", "CHN", "AGO", "COL"))
+```
+
+# Questão 5
+
+```{r}
+WDI <- read_excel(fname, sheet = "Data")
+```
+
+# Questão 6
+
+```{r}
+WDI <- WDI |> 
+  select(`Country Code`, `Indicator Code`, c(`1960`:`2018`))
+```
+
+# Questão 7
+
+```{r}
+WDI <- WDI |> 
+  pivot_longer(
+    cols = `1960`:`2018`,
+    names_to = "YEAR",
+    values_to = "Values"
+  )
+```
+
+# QUestão 8
+```{r}
+is.integer(WDI$YEAR)
+```
+
+```{r}
+WDI <-  WDI |> 
+  mutate(YEAR = as.integer(YEAR))
+
+is.integer(WDI$YEAR)
+```
+
+# Questão 9
+
+```{r}
+WDI <- WDI |> 
+  inner_join(
+    countries |> select(`Country Code`, `Short Name`), 
+    by = "Country Code") |> 
+    select(`Country Code`, `Short Name`, `YEAR`, `Indicator Code`, `Values`) |> 
+  filter(`Indicator Code` == "SP.DYN.CBRT.IN")
+```
+
+# Questão 10
+
+```{r}
+WDI <- WDI |> 
+  arrange(`Country Code`, YEAR)
+```
+
+# questão 11
+
+```{r}
+library(ggplot2)
+
+ggplot(WDI, aes(x = YEAR, y = `Values`, color = `Country Code`)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Taxa bruta de natalidade (1960-1980)",
+    x = "Ano",
+    y = "SP.DYN.CBRT.IN",
+    color = "País"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
