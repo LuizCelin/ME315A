@@ -1,0 +1,182 @@
+---
+title: "ME315A_Lab05_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(leaflet)
+library(ggcal)
+library(readr)
+library(scales)
+library(webshot2)
+```
+```{r}
+arquivo <-  file.path("flights.csv.zip")
+```
+
+```{r funcao}
+analisa_aeronave <- function(tail_number, arquivo) {
+  processa_chunk <- function(chunk, pos) {
+    chunk %>%
+      filter(TAIL_NUMBER == tail_number) %>%
+      drop_na(DISTANCE, AIR_TIME)
+  }
+  
+  flights <- read_csv_chunked(
+    arquivo,
+    callback = DataFrameCallback$new(processa_chunk),
+    chunk_size = 1e6
+  )
+  
+  tabela <- flights %>%
+    arrange(YEAR, MONTH, DAY, DEPARTURE_TIME)
+  
+  airports <- read.csv(
+    file.path(dirname(arquivo), "airports.csv")
+  )
+  
+  airports <- airports %>%
+    drop_na(LATITUDE, LONGITUDE)
+  
+  flights <- flights %>%
+    left_join(airports,
+      by = c("ORIGIN_AIRPORT" = "IATA_CODE")
+    ) %>%
+    rename(LAT_ORIGIN = LATITUDE,
+      LON_ORIGIN = LONGITUDE,
+      CITY_ORIGIN = CITY,
+      COUNTRY_ORIGIN = COUNTRY,
+      STATE_ORIGIN = STATE,
+      AIRPORT_ORIGIN = AIRPORT
+    ) %>%
+    left_join(airports,
+      by = c("DESTINATION_AIRPORT" = "IATA_CODE")
+    ) %>%
+    rename(LAT_DESTINATION = LATITUDE,
+      LON_DESTINATION = LONGITUDE,
+      CITY_DESTINATION = CITY,
+      COUNTRY_DESTINATION = COUNTRY,
+      STATE_DESTINATION = STATE,
+      AIRPORT_DESTINATION = AIRPORT
+    ) %>%
+    mutate(
+      DATA = paste(YEAR, MONTH, DAY, sep = "-"),
+      VELOCIDADE = DISTANCE / (AIR_TIME / 60)
+    ) %>%
+    arrange(YEAR, MONTH, DAY, DEPARTURE_TIME)
+  
+  cores_voos <- colorFactor(
+    palette = c(
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd"
+    ),
+    domain = flights$FLIGHT_NUMBER
+  )
+  
+  pousos <- flights %>%
+    group_by(
+      DESTINATION_AIRPORT,
+      LAT_DESTINATION,
+      LON_DESTINATION
+    ) %>%
+    summarise(
+      total_pousos = n(),
+      delay_mean = mean(DEPARTURE_DELAY, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      raio = rescale(total_pousos, to = c(5, 20))
+    )
+  
+  
+  palheta <- colorNumeric(
+    palette = "YlOrRd",
+    domain = pousos$delay_mean
+  )
+  
+  mapa <- leaflet() %>%
+    addTiles()
+  
+  for (linha in seq_len(nrow(flights))) {
+    voo <- flights[linha, ]
+    espessura <- rescale(
+      voo$VELOCIDADE,
+      to = c(0.5, 2)
+    )
+    
+    mapa <- mapa %>%
+      addPolylines(
+        lng = c(voo$LON_ORIGIN, voo$LON_DESTINATION),
+        lat = c(voo$LAT_ORIGIN, voo$LAT_DESTINATION),
+        color = cores_voos(voo$FLIGHT_NUMBER),
+        weight = espessura,
+        opacity = 0.5,
+        popup = paste0(
+          "<b>Origem:</b> ",
+          voo$COUNTRY_ORIGIN,
+          "-",
+          voo$STATE_ORIGIN,
+          "<br>",
+          voo$CITY_ORIGIN,
+          "<br>",
+          "<b>Aeroporto (origem):</b> ",
+          voo$AIRPORT_ORIGIN,
+          "<br>",
+          "<b>Destino:</b> ",
+          voo$COUNTRY_DESTINATION,
+          "-",
+          voo$STATE_DESTINATION,
+          "<br>",
+          voo$CITY_DESTINATION,
+          "<br>",
+          "<b>Aeroporto (destino):</b> ",
+          voo$AIRPORT_DESTINATION,
+          "<br>",
+          "<b>Data:</b> ",
+          voo$DATA,
+          "<br>",
+          "<b>Velocidade média:</b> ",
+          round(voo$VELOCIDADE, 1),
+          " mph (milhas por hora)"
+        )
+      )
+  }
+  
+  mapa <- mapa %>%
+    addCircleMarkers(
+      data = pousos,
+      lng = ~LON_DESTINATION,
+      lat = ~LAT_DESTINATION,
+      radius = ~raio,
+      color = ~palheta(delay_mean),
+      fillColor = ~palheta(delay_mean),
+      fillOpacity = 0.3,
+      weight = 2
+    )
+  
+  output <- list(
+    tabela = flights,
+    grafico = mapa
+  )
+  
+  return(output)
+}
+```
+
+```{r}
+test1 <- analisa_aeronave("N431WN", arquivo)
+
+test1$tabela
+test1$grafico
+```
+
+```{r tempo}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
