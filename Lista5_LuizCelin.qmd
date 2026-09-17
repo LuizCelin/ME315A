@@ -1,0 +1,96 @@
+---
+title: "ME315A_Lista5_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: visual
+---
+
+### Setup
+```{r}
+library(DBI)
+library(RSQLite)
+
+# Conecta/Cria o arquivo
+con <- dbConnect(RSQLite::SQLite(), "me315.sqlite")
+```
+
+```{sql connection=con}
+SELECT * FROM PRESERVE
+```
+
+# Questão 1
+```{sql connection=con}
+SELECT PNAME, ACRES, ACRES * 1.2 AS NEW_ACRES FROM PRESERVE
+```
+
+# Questão 2
+```{sql connection=con}
+SELECT PNAME, ACRES, ACRES / 3 AS NEW_ACRES FROM PRESERVE
+```
+
+# Questão 3
+```{sql connection=con}
+SELECT PNAME, FEE, (FEE + 50) / 2 AS NEW_FEE FROM PRESERVE 
+```
+
+# QUESTÃO 4
+```{sql connection=con}
+SELECT AVG(ACRES) AS MEDIA, MAX(ACRES) AS MAXIMA, MIN(ACRES) AS MINIMA FROM PRESERVE
+WHERE STATE = "AZ"
+```
+
+# QUESTÃO 5
+```{sql connection=con}
+SELECT PNAME FROM PRESERVE
+ORDER BY PNAME
+```
+
+# QUESTÃO 6
+```{sql connection=con}
+SELECT COUNT(DISTINCT(FEE)) FROM PRESERVE
+WHERE STATE != 0
+```
+# QUESTÃO 7
+```{sql connection=con}
+SELECT COUNT(PNAME), COUNT(DISTINCT PNAME) FROM PRESERVE
+```
+
+# QUESTÃO 8
+```{sql connection=con}
+SELECT AVG(ACRES * 0.02) FROM PRESERVE
+WHERE STATE = "AZ"
+```
+
+# QUESTÃO 9
+```{sql connection=con}
+SELECT ENO, ENAME, SALARY AS OLDSALARY, SALARY * 1.10 AS NEWSALARY FROM EMPLOYEE
+ORDER BY NEWSALARY
+```
+
+# QUESTÃO 10
+```{sql connection=con}
+SELECT ENO, ENAME, SALARY AS OLDSALARY, SALARY * 1.10 AS NEWSALARY FROM EMPLOYEE
+WHERE NEWSALARY > 2000
+ORDER BY NEWSALARY
+```
+
+# QUESTÃO 11
+```{sql connection=con}
+SELECT SUM(SALARY) AS TOTAL, AVG(SALARY) AS MEDIA, MAX(SALARY) AS MAXIMO, MIN(SALARY) AS MINIMO FROM EMPLOYEE
+```
+
+# QUESTÃO 12
+```{sql connection=con}
+SELECT COUNT(*) FROM EMPLOYEE
+WHERE DNO = 20
+```
+
+# QUESTÃO 13
+```{sql connection=con}
+SELECT COUNT(DISTINCT DNO) FROM EMPLOYEE
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
