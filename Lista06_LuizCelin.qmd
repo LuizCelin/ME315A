@@ -1,0 +1,70 @@
+---
+title: "ME315A_Lista 06_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: visual
+---
+
+# Lista06
+
+```{r setup}
+#install.packages("RSQLite")
+library(RSQLite)
+library(tidyverse)
+```
+
+```{r inicio}
+path <- ("dataset")
+fname <- file.path(path, "disco.db")
+
+conn <- dbConnect(SQLite(), fname)
+
+#Listando os bancos
+dbListTables(conn)
+```
+
+```{r}
+dbListFields(conn, "customers")
+```
+
+```{r}
+dbGetQuery(conn, "SELECT COUNT(CustomerId) AS N_clientes FROM customers")
+```
+
+```{r}
+dbGetQuery(conn, "SELECT COUNT(DISTINCT(Country)) AS N_Paises FROM customers")
+```
+
+```{r}
+dbGetQuery(conn, "SELECT country, COUNT(*) as quantidade FROM customers
+           GROUP BY country
+           ORDER BY quantidade DESC")
+```
+
+```{r}
+dbGetQuery(conn, "SELECT country, COUNT(*) as Quantidade_Clientes FROM customers
+           GROUP BY country
+           ORDER BY Quantidade_Clientes DESC
+           LIMIT 5")
+```
+
+```{r}
+dbGetQuery(conn, "SELECT DISTINCT(country) FROM customers
+           WHERE LENGTH(country) = 6")
+#Utilizei Length porque não consegui utilizar o GLOB pois dava um erro.
+```
+
+```{r}
+dificil <- dbGetQuery(conn, "SELECT DISTINCT tracks.Name FROM customers
+           INNER JOIN invoices ON customers.CustomerId = invoices.CustomerId
+           INNER JOIN invoice_items ON invoices.InvoiceId = invoice_items.InvoiceId
+           INNER JOIN tracks ON invoice_items.TrackId = tracks.TrackId
+           WHERE customers.Country = 'Brazil' ")
+knitr::kable(dificil)
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
+
