@@ -1,0 +1,121 @@
+---
+title: "ME315A_Lista06_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: visual
+---
+
+```{r setup}
+library(RSQLite)
+library(DBI)
+
+con <- dbConnect(RSQLite::SQLite(), "me315.sqlite")
+```
+
+## QUESTÃO 1
+```{sql connection=con}
+SELECT * FROM PRESERVE
+GROUP BY STATE
+ORDER BY ACRES
+```
+
+## QUESTÃO 2
+```{sql connection=con}
+SELECT STATE, MAX(ACRES) AS MAIOR_AREA FROM PRESERVE
+WHERE ACRES <= 10000
+GROUP BY STATE
+```
+
+## QUESTÃO 3
+```{sql connection=con}
+SELECT STATE, MAX(ACRES) AS MAIOR_AREA FROM PRESERVE
+WHERE ACRES <= 10000
+GROUP BY STATE
+ORDER BY MAIOR_AREA DESC
+```
+
+## QUESTÃO 4
+```{sql connection=con}
+SELECT STATE, MAX(ACRES) AS MAIOR_AREA FROM PRESERVE
+WHERE ACRES <= 25000
+GROUP BY STATE
+```
+
+## QUESTÃO 5
+```{sql connection=con}
+SELECT STATE, MIN(ACRES) FROM PRESERVE
+WHERE ACRES < 100
+GROUP BY STATE
+```
+
+## QUESTÃO 6
+```{sql connection=con}
+SELECT STATE, PNAME, MAX(ACRES) AS MAIOR_AREA  FROM PRESERVE
+WHERE ACRES > 1000 AND ACRES < 25000
+GROUP BY STATE
+
+
+```
+
+## QUESTÃO 7
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) AS TOTAL FROM PRESERVE
+GROUP BY STATE
+HAVING TOTAL >= 10000 AND TOTAL <= 50000
+```
+
+## QUESTÃO 8
+```{sql connection=con}
+SELECT STATE, AVG(ACRES) AS MAIOR_MEDIA FROM PRESERVE
+GROUP BY STATE
+ORDER BY MAIOR_MEDIA DESC
+LIMIT 1
+```
+
+## QUESTÃO 9
+```{sql connection=con}
+SELECT DNO, AVG(SALARY) SALARIO_MEDIO FROM EMPLOYEE
+GROUP BY DNO
+```
+
+## QUESTÃO 10
+```{sql connection=con}
+SELECT DNO,
+SUM(SALARY) AS SOMA,
+MAX(SALARY) AS MAXIMO,
+MIN(SALARY) AS MINIMO 
+FROM EMPLOYEE
+```
+
+## QUESTÃO 11
+```{sql connection=con}
+SELECT DNO,
+COUNT(ENAME) AS N_FUNCIONARIOS
+FROM EMPLOYEE
+WHERE DNO != 40
+GROUP BY DNO
+```
+
+## QUESTÃO 12
+```{sql connection=con}
+SELECT DNO, COUNT(DISTINCT(ENAME)) N_FUNCIONARIOS,
+SALARY
+FROM EMPLOYEE
+GROUP BY DNO
+HAVING N_FUNCIONARIOS > 2
+```
+
+## QUESTÃO 13
+```{sql connection=con}
+SELECT STATE, SUM(ACRES) FROM PRESERVE
+GROUP BY STATE
+UNION ALL
+SELECT "TOTAL", SUM(ACRES) FROM PRESERVE
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
+
+
