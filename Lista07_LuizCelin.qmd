@@ -1,0 +1,89 @@
+---
+title: "ME315A_Lista07_LuizCelin"
+author: "Luiz Fernando Celin"
+format: pdf
+editor: visual
+---
+
+```{r setup}
+library(RSQLite)
+library(DBI)
+knitr::opts_chunk$set(max.print = Inf)
+
+con <- dbConnect(RSQLite::SQLite(), "purchase.sqlite")
+```
+
+```{sql connection=con}
+SELECT * FROM PURCHASE
+```
+
+## QUESTÃO 1
+```{sql connection=con}
+SELECT PNO, SUM(COST) AS TOTAL FROM PURCHASE
+GROUP BY PNO
+```
+
+## QUESTÃO 2
+```{sql connection=con}
+SELECT ENO, SUM(COST) AS TOTAL_WORKER FROM PURCHASE
+GROUP BY ENO
+```
+
+## QUESTÃO 3
+```{sql connection=con}
+SELECT PJNO, ENO, SUM(COST) AS TOTAL FROM PURCHASE
+GROUP BY PJNO, ENO
+ORDER BY PJNO, ENO
+```
+
+## QUESTÃO 4
+```{sql connection=con}
+SELECT PNO, SNO, SUM(COST) AS TOTAL FROM PURCHASE
+GROUP BY PNO, SNO
+ORDER BY PNO, ENO
+```
+
+## QUESTÃO 5
+```{sql connection=con}
+SELECT PJNO, ENO, SNO, SUM(COST) FROM PURCHASE
+GROUP BY PJNO, ENO, SNO
+ORDER BY PJNO, ENO, SNO
+```
+## QUESTÃO 6
+```{sql connection=con}
+SELECT PNO, SNO, ENO, SUM(COST) FROM PURCHASE
+GROUP BY PNO, SNO, ENO
+ORDER BY PNO, SNO, ENO
+```
+
+## QUESTÃO 7
+```{sql connection=con}
+SELECT PJNO, ENO, SNO, SUM(COST) AS TOTAL FROM PURCHASE
+WHERE PJNO != "PJ2"
+GROUP BY PJNO, ENO, SNO
+```
+
+## QUESTÃO 8
+```{sql connection=con}
+SELECT PNO, SNO, ENO, SUM(COST) AS TOTAL FROM PURCHASE
+GROUP BY PNO, SNO, ENO
+HAVING TOTAL > 2000
+```
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
